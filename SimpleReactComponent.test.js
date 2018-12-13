@@ -19,5 +19,8 @@ describe('<SimpleReactComponent />', async () => {
     // We have to use toEqual here because the rendered result we get()
     // will not be the _exact same element "in memory" as the expected definition we pass in
     expect(wrapper.get(0)).toEqual(<h3>HELLO WORLD</h3>);
+
+    // maybe the most important method of wrapper is .debug()
+    expect(wrapper.debug()).toBe('');
   });
 });
