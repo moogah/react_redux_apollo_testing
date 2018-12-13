@@ -16,6 +16,8 @@ describe('<SimpleReactComponent />', async () => {
     expect(wrapper.text()).toBe('HELLO WORLD');
 
     // .get() will retrieve the rendered elementy by index
+    // We have to use toEqual here because the rendered result we get()
+    // will not be the _exact same element "in memory" as the expected definition we pass in
     expect(wrapper.get(0)).toEqual(<h3>HELLO WORLD</h3>);
   });
 });
