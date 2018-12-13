@@ -13,6 +13,6 @@ module.exports = {
     '^@hocs(.*)$': '<rootDir>/src/site/hocs$1',
     '^@types(.*)$': '<rootDir>/src/site/types$1'
   },
-  // setupFiles: ['./testHelpers/setupTests.js'],
+  setupFiles: ['./setupEnzyme.js'],
   // snapshotSerializers: ['enzyme-to-json/serializer']
 };

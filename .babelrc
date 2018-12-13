@@ -1,8 +1,9 @@
 {
-  "presets": [["env", {"targets": {"node": "8.9"} }]],
+  "presets": ["env", "react"],
   "plugins": [
     "syntax-dynamic-import",
     "transform-object-rest-spread",
-    "transform-class-properties"
+    "transform-class-properties",
+    "transform-export-extensions"
   ]
 }

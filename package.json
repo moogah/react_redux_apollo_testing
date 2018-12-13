@@ -4,26 +4,33 @@
   "description": "testing sandbox for react testing",
   "main": "index.js",
   "scripts": {
-    "test": "cross-env NODE_ENV=test jest"
+    "test": "cross-env NODE_ENV=test jest",
+    "test-watch": "npm run test -- --watch"
   },
   "author": "jeff farr",
   "license": "ISC",
   "dependencies": {
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
     "babel": "^6.23.0",
+    "babel-core": "^6.26.3",
     "babel-jest": "^23.6.0",
     "babel-plugin-syntax-dynamic-import": "^6.18.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-export-extensions": "^6.22.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
     "cross-env": "^5.2.0",
     "enzyme": "^3.8.0",
+    "enzyme-adapter-react-16": "^1.7.1",
     "graphql": "^14.0.2",
     "jest": "^23.6.0",
+    "jest-cli": "^23.6.0",
     "react": "^16.6.3",
     "react-apollo": "^2.3.2",
+    "react-dom": "^16.6.3",
     "react-redux": "^6.0.0",
+    "react-test-renderer": "^16.6.3",
     "redux": "^4.0.1",
     "sinon": "^7.2.2"
   }
