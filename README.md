@@ -281,7 +281,6 @@ Lastly we have `Query` return our desired component, passing into it the resulti
     <ReactWithApollo
       {...props}
       {...data}
-      {...error}
     />
   );
 }}
