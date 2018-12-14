@@ -64,16 +64,16 @@ Where before we assigned properties to a react component when and where we wrote
 A short explanation of redux is that it provides us with a javascript object that contains all the data in our application along with a set of functions for setting and retreiving these values.  Unlike a class that has get() and set() methods however, we interact with redux by passing "actions" into a "reducer".
 
 An action is simply a js object that has a `type` property and then some additional properties which we can define.  ie:
-```
+```javascript
 actionDefinition = {
   type: 'MY_ACTION_ID',
   greeting: 'Howdy'
 }
 ```
-only the `type` value is needed and it's value is essentially arbitrary, but that value needs to be consistently used to identify any particular action.
+only the `type` value is needed and its value is essentially arbitrary, but that value needs to be consistently used to identify any particular action.
 
-When we pass an action object into the reducer it will know how to check the type property and then perform some function on the addional data that is sent in, combining these new properties with the existing state object and passing back a new state object as a result.  ie:
-```
+A simple reducer is a function that knows how to check the type of an action and then perform the appropriate process to merge the action's additional parameters into the current state object, combining these new properties with the existing state and passing back a new state object as a result.  ie:
+```javascript
 state = {
   title: 'El Capitan',
   name: 'George'
@@ -86,21 +86,24 @@ action = {
 
 function reducer(state, action) {
   if (action.type == 'CHANGE_NAME') {
-    // ...state means we will return all state properties not specifially named
     return {...state, name: action.name}
   }
 }
 ```
 
 if we pass `action` and `state` to `reducer()` we will get back a new state object:
-```
+```javascript
 {
   title: 'El Capitan',
   name: 'Fred'
 }
 ```
 
-Unit testing redux is typically simple; actions, selectors and the reducer are simple functions and no additional design patterns are necessary.
+`...state` means we will return all properties of `state` not specifially named later in the return object.  It's a useful bit of syntatical sugar that javascript gives us so we don't need to run a bunch of `if` statements to compare the values of the current state with the incoming paremeters of the incoming action.
+
+The typical pattern for a project using redux will have the actions, reducers and selectors spread into their own subfolders, but this is not necessary.  To make it easier to experiment with them I've created a single file called `reduxStore.js` that contains all of these elements.
+
+I've also overstuffed the `ReactWithRedux.test.js` file with tests for each part of the redux store to demonstrate how they work individually.  In most cases Redux is composed of plain functions, so there is no special design patterns needed to unit test them.
 
 ReactComponents that are connected to a Redux store however start to become more complicated to test.  The first wrinkle is that we don't want to set properties directly on our components because that may not ensure we've tested how logic in our selectors and reducer affect the properties that get passed in.
 
@@ -108,6 +111,66 @@ Further complicating the situation is the special `connect()` function that come
 
 `connect()` has a bunch of automagic that will handle wiring up the details of this for us. which is nice.  The downside is that `connect()` will return our component wrapped inside another component..
 
-This means that when we use Enzyme to render our components the `shallow()` option isn't sufficient.  Instead we need to use `mount()` which will render the entire tree.
+This means that when we use Enzyme to render our components the `shallow()` option isn't sufficient if we want to see the rendered result of everything all together.  Instead we need to use `mount()` which will render the entire tree.
+
+This makes using Enzyme significantly more complicated if we want to check the rendering process in detail.  The most common issue I've found is that using `.find(ReactWithRedux)` will return not only our component, but a special generated component wrapping it, ie:
+
+```
+<Connect(ReactWithRedux)>
+  <ReactWithRedux greeting="Hello!" actions={{...}}>
+    <h3 className="findMe">
+      Hello!
+    </h3>
+  </ReactWithRedux>
+</Connect(ReactWithRedux)>
+```
+
+This makes attempts to check props difficult, especially if we expect a prop to be `undefined`
+
+```javascript
+const reactWithRedux = wrapper.find(ReactWithRedux);
+expect(reactWithRedux.props().greeting).toBe(undefined);
+```
+Although this would seem like a good test, the nature of javascipt means it will pass even when there is no prop `greeting` on the wrapper.  For example, this also passes:
+
+```javascript
+const reactWithRedux = wrapper.find(ReactWithRedux);
+expect(reactWithRedux.props().TOTALLYRANDOMCRAP).toBe(undefined);
+```
+
+Looking at the API for the various `*Wrapper` classes, there are `.get()` and `.at()` methods that at first glace seem helpful, but none of these are able to climb into a tree of elements, their indexing only looks for top level elements that are neighbors, ie:
+
+```
+<ContainerElementOne>
+  <ElementOne></ElementOne>
+</ContainerElementOne>
+<ContainerElementTwo>
+  <ElementTwo></ElementTwo>
+</ContainerElementTwo>
+```
+
+calling `.get(1)` on a structure like this will return
+
+```
+<ContainerElementTwo>
+  <ElementTwo></ElementTwo>
+</ContainerElementTwo>
+```
+
+I've found no way to use a combination of `.find()` `.at()` and `.get()` to return `ElementOne` or `ElementTwo`.
 
 Once we understand Redux, the comments in the test will explain what's going on well enough.  The one key thing to pay attention to is how we set the value of `greeting` by dispatching an action to redux instead of setting the prop directly: `store.dispatch(setGreeting('Hello!'));`
+
+```
+  <Connect(ReactWithRedux)>
+    <ReactWithRedux greeting={[undefined]} actions={{...}}>
+      <h3 className="findMe" />
+    </ReactWithRedux>
+  </Connect(ReactWithRedux)>
+```
+
+
+
+# ReactWithApollo
+
+

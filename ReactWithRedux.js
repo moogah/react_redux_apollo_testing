@@ -16,7 +16,7 @@ const mapDispatchToProps = dispatch => ({
 class ReactWithRedux extends React.Component {
   render() {
     return (
-      <h3>{this.props.greeting}</h3>
+      <h3 className='findMe'>{this.props.greeting}</h3>
     );
   }
 }

@@ -91,11 +91,11 @@ describe('<ReactWithRedux />', async () => {
 
     const providerProps = wrapper.props();
 
-    // the provider will also contain the store and it's current state
+    // the provider will contain the store and it's current state
     expect(providerProps.store.getState()).toEqual({greeting: undefined});
 
     // and our component will have the default greeting
-    expect(wrapper.find(ReactWithRedux).html()).toBe('<h3></h3>');
+    expect(wrapper.find(ReactWithRedux).html()).toBe('<h3 class=\"findMe\"></h3>');
 
     // and we can change this state by dispatching an action to the store
     store.dispatch(setGreeting('Hello!'));
@@ -103,18 +103,20 @@ describe('<ReactWithRedux />', async () => {
     // The store will have the new value
     expect(providerProps.store.getState()).toEqual({greeting: 'Hello!'});
     // and our component will have it's greeting
-    const reactWithRedux = wrapper.find(ReactWithRedux);
-    expect(reactWithRedux.html()).toBe('<h3>Hello!</h3>');
+    const reactWithRedux = wrapper.find('.findMe');
+    expect(reactWithRedux.html()).toBe('<h3 class=\"findMe\">Hello!</h3>');
 
     // there is a problem though, even though we can "see" the updated
     // component with .html(), this change has not yet been rendered
-    console.log(reactWithRedux.props());
-    expect(reactWithRedux.get(0).props.greeting).toBe(undefined);
+    console.log(reactWithRedux.props().greeting);
+    expect(reactWithRedux.get(0).props.TOTALLYRANDOMCRAP).toBe(undefined);
 
     // the solution is simple, enzyme provides us a way to force a re-render
     wrapper.update();
-    const reRenderedReactWithRedux = wrapper.find(ReactWithRedux);
-    console.log(reRenderedReactWithRedux.debug());
+    const r = wrapper.find(ReactWithRedux);
+    console.log(r.debug());
+    const reRenderedReactWithRedux = wrapper.find('.findMe');
+    console.log(reRenderedReactWithRedux.text());
     //console.log(reRenderedReactWithRedux.instance().props);
     //expect(reRenderedReactWithRedux.props.greeting).toBe('Hello!');
   });
