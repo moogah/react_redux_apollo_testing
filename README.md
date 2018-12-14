@@ -128,20 +128,33 @@ if we pass `action` and `state` to `reducer()` we will get back a new state obje
 }
 ```
 
-`...state` means we will return all properties of `state` not specifially named later in the return object.  It's a useful bit of syntatical sugar that javascript gives us so we don't need to run a bunch of `if` statements to compare the values of the current state with the incoming paremeters of the incoming action.
+`...state` means we will return all properties of `state` not specifially named later in the return object.  It's a useful bit of syntatical sugar that javascript gives us so we don't need to run a bunch of `if` statements to compare the values of the current state with the incoming paremeters of the action.
 
 The typical pattern for a project using redux will have the actions, reducers and selectors spread into their own subfolders, but this is not necessary.  To make it easier to experiment with them I've created a single file called `reduxStore.js` that contains all of these elements.
 
 ##### Testing Redux
 I've overstuffed the `ReactWithRedux.test.js` file with tests for each part of the redux store to demonstrate how they work individually.  In common cases Redux is composed of plain functions, so there is no special design pattern needed to unit test them.
 
-##### Testing React with Redux (wrapper all the way down)
+##### Testing React with Redux (wrappers all the way down)
 
-ReactComponents that are connected to a Redux store however start to become more complicated to test.  The first wrinkle is that we don't want to set properties directly on our components because that may not ensure we've tested how logic in our selectors and reducer affect the properties that get passed in.
+Relative to the simplicity of testing Redux, ReactComponents that are connected to a Redux store are  complicated to test.  The first wrinkle is that we don't want to set properties directly on our components because that may not ensure we've tested how logic in our selectors and reducer affect the properties that get passed in.
 
-Further complicating the situation is the special `connect()` function that comes with the `react-redux` library.  This function takes in a Component and a set of functions that define how we want our component to interact with redux.  The easiest to explain is `mapStateToProps`.  Here we map the name of a property we want in our component to the selector function of our redux store.
+Further complicating the situation is the special `connect()` function that comes with the `react-redux` library.  This function takes in a Component and a set of functions that define how we want our component to interact with redux.  The easiest to explain is `mapStateToProps` _ie:_
+```javascript
+const mapStateToProps = state => ({
+  greeting: getGreeting(state)
+});
+```
+Here we map the name of the property `greeting` we want in our component to the selector function `getGreeting()` of our redux store.
 
-`connect()` has a bunch of automagic that will handle wiring up the details of this for us. which is nice.  The downside is that `connect()` will return our component wrapped inside another component..
+`connect()` has a bunch of automagic that will handle wiring up the details of this for us.  We get this with a bit of code like:
+```javascript
+const ConnectedReactWithRedux = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ReactWithRedux);
+```
+This is a bunch of automagic that wires up the React and Redux engines, which is great.  Unfortunatly this also means our simple reach component is no longer so simple.
 
 This means that when we use Enzyme to render our components the `shallow()` option isn't sufficient if we want to see the rendered result of everything all together.  Instead we need to use `mount()` which will render the entire tree.
 
