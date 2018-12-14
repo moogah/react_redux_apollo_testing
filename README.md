@@ -3,7 +3,7 @@ The simplest "Hello World" of testing in react requires a bit of setup to get go
 
 
 #### Requirements:
-*jest.config.js*
+##### jest.config.js
 
 For this project we're going to use the default settings for jest.  This means it will recognize any file ending with .test.js as a test file.
 
@@ -13,8 +13,20 @@ Speaking of `--watch`, take a look at `package.json`.  The `scripts` section is 
 ```
 npm test cross-env NODE_ENV=test jest -- --watch
 ```
+##### enzyme test helper
 
-*babel, plugins, presets and .babelrc*
+Check out `setupEnzyme.js`.  This is a simple javascript file that sets up the Adapters needed by Enzyme.  We could just include this code in the files that actually use Enzyme, but for this project it isn't necessary.
+
+##### babel, plugins, presets and .babelrc
+
+The most important thing in this section is that Jest has some automagic in it's code, it will look for the presence of a `.babelrc` file in the root of the repository.  If it finds one, it will include the babel transpilier to interpret both our .js and .test.js files before Jest runs them.  This is relevant because defining React components in ES6 javascript uses syntax that is not tecnically valid.  _ie_:
+
+```
+return (
+  <h3>HELLO WORLD</h3>
+);
+```
+isn't a valid statement in any other language I've seen.  Some light research leads me to believe this is "JSX", and without babel to interpret this code before Jest runs it you'll have a bad time.
 
 Here we rely on npm install to get all the plugins needed.  Unfortunalty I've not found any one reference that explains exactly what you need, so for now all we can do is reference our existing and working `package.lock` files.  
 
@@ -26,10 +38,6 @@ https://stackoverflow.com/questions/48137486/jest-enzyme-shallow-unexpected-toke
 https://github.com/lelandrichardson/enzyme-example-jest/blob/master/.babelrc
 https://github.com/airbnb/babel-preset-airbnb
 https://github.com/vuejs/vue-cli/issues/2432
-
-*enzyme test helper*
-
-This is a simple javascript file that sets up the Adapters needed by Enzyme.  We could just include this in the test files that actually use Enzyme, but for this project it isn't necessary.
 
 # SimpleReactComponent
 Let's start with the easiest possible example so we can focus on what the Enzyme framework does and what we can do with its API.
