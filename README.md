@@ -38,7 +38,7 @@ We're going to use `enzyme.shallow()` to render our component so we can run test
 
 `shallow()` returns a `ShallowWrapper` object that has a ton of methods for inspecting what was rendered.  Some of the most intuitive are `.text()` and `.html()`.
 
-One of the most useful methods you'll find on many enzyme objects is `.get()`.  This takes an index value and will return the element of the tree at that index.  ie:
+One of the most useful methods you'll find on many enzyme objects is `.get()`.  This takes an index value and will return the element of the tree at that index.  _ie:_
 ```
 <ContainerElement>
   <ElementOne></ElementOne>
@@ -59,11 +59,13 @@ If we're dilligently testing each component and we fully understand how props ar
 This approach breaks down when we're trying to use more complex architechures and don't yet understand how they wire everything together.  Enzyme is a great tool for exploring these environments, so let's start digging deeper.
 
 # ReactReduxComponent
-Where before we assigned properties to a react component when and where we wrote their tags (ie: `<ComponentWithProps greeting={'HELLO WORLD'}/>`), now we're going to use Redux for managing that process.  There a number of reasons why redux is a better design pattern and no shortage of blogs on the internet to read if you want to know more about why :)
+In the previous examples we assigned properties to a react component when and where we wrote their tags, _ie:_ `<ComponentWithProps greeting={'HELLO WORLD'}/>`.  Now we're going to use Redux for managing that process.  There a number of reasons why redux is a better design pattern and no shortage of blogs on the internet to read if you want to know more about why :)
 
-A short explanation of redux is that it provides us with a javascript object that contains all the data in our application along with a set of functions for setting and retreiving these values.  Unlike a class that has get() and set() methods however, we interact with redux by passing "actions" into a "reducer".
+#### Redux, in tweet-sized bites
+A short explanation of redux is that it provides us with a javascript object that contains all the data in our application along with a set of functions for setting and retreiving these values.  Unlike a class that has get() and set() methods that can be called directly, we interact with redux by passing "actions" into a "reducer".
 
-An action is simply a js object that has a `type` property and then some additional properties which we can define.  ie:
+##### Actions
+An action is simply a js object that has a `type` property and then some additional properties which can be defined as we please.  _ie:_
 ```javascript
 actionDefinition = {
   type: 'MY_ACTION_ID',
@@ -72,7 +74,22 @@ actionDefinition = {
 ```
 only the `type` value is needed and its value is essentially arbitrary, but that value needs to be consistently used to identify any particular action.
 
-A simple reducer is a function that knows how to check the type of an action and then perform the appropriate process to merge the action's additional parameters into the current state object, combining these new properties with the existing state and passing back a new state object as a result.  ie:
+##### Selectors
+Selectors are simple functions that take in an object and return a single element of it.  They are typically written with the terse function notation that javascript provides.
+
+```
+const getGreeting = state => state.greeting;
+```
+
+is the same as
+```
+function getGreeting(state) {
+  return state.greeting;
+}
+```
+
+##### Reducers
+A simple reducer is a function that knows how to check the type of an action and then perform the appropriate process to merge the action's additional parameters into the current state object, combining these new properties with the existing state and passing back a new state object as a result.  _ie:_
 ```javascript
 state = {
   title: 'El Capitan',
@@ -103,7 +120,10 @@ if we pass `action` and `state` to `reducer()` we will get back a new state obje
 
 The typical pattern for a project using redux will have the actions, reducers and selectors spread into their own subfolders, but this is not necessary.  To make it easier to experiment with them I've created a single file called `reduxStore.js` that contains all of these elements.
 
-I've also overstuffed the `ReactWithRedux.test.js` file with tests for each part of the redux store to demonstrate how they work individually.  In most cases Redux is composed of plain functions, so there is no special design patterns needed to unit test them.
+##### Testing Redux
+I've overstuffed the `ReactWithRedux.test.js` file with tests for each part of the redux store to demonstrate how they work individually.  In common cases Redux is composed of plain functions, so there is no special design pattern needed to unit test them.
+
+##### Testing React with Redux (wrapper all the way down)
 
 ReactComponents that are connected to a Redux store however start to become more complicated to test.  The first wrinkle is that we don't want to set properties directly on our components because that may not ensure we've tested how logic in our selectors and reducer affect the properties that get passed in.
 
@@ -113,7 +133,7 @@ Further complicating the situation is the special `connect()` function that come
 
 This means that when we use Enzyme to render our components the `shallow()` option isn't sufficient if we want to see the rendered result of everything all together.  Instead we need to use `mount()` which will render the entire tree.
 
-This makes using Enzyme significantly more complicated if we want to check the rendering process in detail.  The most common issue I've found is that using `.find(ReactWithRedux)` will return not only our component, but a special generated component wrapping it, ie:
+This makes using Enzyme significantly more complicated if we want to check the rendering process in detail.  The most common issue I've found is that using `.find(ReactWithRedux)` will return not only our component, but a special generated component wrapping it, _ie:_
 
 ```
 <Connect(ReactWithRedux)>
@@ -138,7 +158,7 @@ const reactWithRedux = wrapper.find(ReactWithRedux);
 expect(reactWithRedux.props().TOTALLYRANDOMCRAP).toBe(undefined);
 ```
 
-Looking at the API for the various `*Wrapper` classes, there are `.get()` and `.at()` methods that at first glace seem helpful, but none of these are able to climb into a tree of elements, their indexing only looks for top level elements that are neighbors, ie:
+Looking at the API for the various `*Wrapper` classes, there are `.get()` and `.at()` methods that at first glace seem helpful, but none of these are able to climb into a tree of elements, their indexing only looks for top level elements that are neighbors, _ie:_
 
 ```
 <ContainerElementOne>
@@ -149,7 +169,7 @@ Looking at the API for the various `*Wrapper` classes, there are `.get()` and `.
 </ContainerElementTwo>
 ```
 
-calling `.get(1)` on a structure like this will return
+calling `wrapper.get(1)` on a structure like this will return
 
 ```
 <ContainerElementTwo>
