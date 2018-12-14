@@ -95,8 +95,9 @@ describe('<ReactWithApollo />', async () => {
     expect(providerProps.store.getState()).toEqual({greeting: undefined});
     expect(wrapper.find(ReactWithApollo).html()).toBe('<h3></h3>');
 
-    // in the ReactWithRedux example we set our greeting directly through the store and actions
-    // here we're going to query an appropriate greeting from graphql using a beNice query parameter
+    // in the ReactWithRedux example we set our greeting directly through the 
+    // store and actions here we're going to query an appropriate greeting from 
+    // graphql using a beNice query parameter
     store.dispatch(setNice(true));
 
     // The store will have the value of our beNice param, but no greeting yet
