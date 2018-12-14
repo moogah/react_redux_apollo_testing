@@ -48,19 +48,11 @@ The component itself is bog standard and only returns some static HTML.  I'll le
 Instead let's focus on Enzyme.  The best reference material I've found for it are the API docs in their github repo https://github.com/airbnb/enzyme/tree/master/docs/api/ShallowWrapper.  It lacks in narrative a bit, but provides plenty of detail if you spend some time with it.
 
 We're going to use `enzyme.shallow()` to render our component so we can run tests on it.  Doing so is simple:
-`const wrapper = shallow(<SimpleReactComponent />);`
-
-`shallow()` returns a `ShallowWrapper` object that has a ton of methods for inspecting what was rendered.  Some of the most intuitive are `.text()` and `.html()`.
-
-One of the most useful methods you'll find on many enzyme objects is `.get()`.  This takes an index value and will return the element of the tree at that index.  _ie:_
-```
-<ContainerElement>
-  <ElementOne></ElementOne>
-  <ElementTwo></ElementTwo>
-<ContainerElement>
+```javascript
+const wrapper = shallow(<SimpleReactComponent />);
 ```
 
-Calling `shallow(<ConainerElement />).get(1)` will return `<ElementTwo>` as a `ReactElement`.  Note that we get a ReactElement (instead of a wrapper) and that's just fine for checking the rendered elements and html of a component, however, when checking props there are some wrinkles... which leads us to:
+`shallow()` returns a `ShallowWrapper` object that has a ton of methods for inspecting what was rendered.  Some of the most intuitive are `.text()` and `.html()`.  Check out `SimpleReactComponet.test.js` for examples.
 
 # ComponentWithProps
 Using `shallow()` is a great way to do proper unit tests in react, the advantage and the drawback is that it will not fully render any components further down the tree, instead simply returning the component tag.
@@ -68,15 +60,21 @@ Using `shallow()` is a great way to do proper unit tests in react, the advantage
 Take a look at our component definition and the expected output in the tests, you'll notice that we don't expect to see `<h4>This won't get rendered</h4>`
 from the internal component in our output.
 
-If we're dilligently testing each component and we fully understand how props are getting passed around, `shallow()` is great and simple way to be sure each component behaves as it should in isolation.
+If we're dilligently testing each component and we fully understand how props are getting passed around, `shallow()` is a great and simple way to be sure each component behaves as it should in isolation.
 
 This approach breaks down when we're trying to use more complex architechures and don't yet understand how they wire everything together.  Enzyme is a great tool for exploring these environments, so let's start digging deeper.
 
 # ReactReduxComponent
-In the previous examples we assigned properties to a react component when and where we wrote their tags, _ie:_ `<ComponentWithProps greeting={'HELLO WORLD'}/>`.  Now we're going to use Redux for managing that process.  There a number of reasons why redux is a better design pattern and no shortage of blogs on the internet to read if you want to know more about why :)
+In the previous examples we assigned properties to a react component when and where we wrote their tags, _ie:_
+```javascript
+<ComponentWithProps greeting={'HELLO WORLD'}/>
+```  
+Now we're going to use Redux for managing that process.  There a number of reasons why redux is a better design pattern and no shortage of blogs to read if you want to know more about why :)
 
 #### Redux, in tweet-sized bites
-A short explanation of redux is that it provides us with a javascript object that contains all the data in our application along with a set of functions for setting and retreiving these values.  Unlike a class that has get() and set() methods that can be called directly, we interact with redux by passing "actions" into a "reducer".
+A short explanation of redux is that it provides us with a javascript object that contains all the data in our application along with a set of functions for mapping these values to the properties of our components.  As extra special sauce, the redux engine can be connected to the React engine so those components are automagically re-rendered when a relevant state parameter is updated.  
+
+Unlike a class that has get() and set() methods that can be called directly, we interact with redux by setting values with an "action" and get them with a "selector".  Another design concept called a "reducer" is responsible for interpreting actions that are passed to it, creating a change of the redux state.
 
 ##### Actions
 An action is simply a js object that has a `type` property and then some additional properties which can be defined as we please.  _ie:_
