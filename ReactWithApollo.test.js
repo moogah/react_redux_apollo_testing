@@ -95,6 +95,10 @@ describe('<ReactWithApollo />', async () => {
     expect(providerProps.store.getState()).toEqual({greeting: undefined});
     expect(wrapper.find(ReactWithApollo).html()).toBe('<h3></h3>');
 
+    // Take a look here to see what is rendered before we set the beNice parameter
+    //console.log(wrapper.debug());
+    //console.log(wrapper.find(Query).props());
+
     // in the ReactWithRedux example we set our greeting directly through the 
     // store and actions here we're going to query an appropriate greeting from 
     // graphql using a beNice query parameter
@@ -106,13 +110,16 @@ describe('<ReactWithApollo />', async () => {
     // Because the HoC introduces async processing, we need to wait for components to re-render
     await updateWrapper(wrapper);
 
+    // Take a look here to see what is rendered after the query is given time to complete
+    //console.log(wrapper.debug());
+    //console.log(wrapper.find(Query).props());
+
     // and we can see that our HoC has been assigned props from the redux store
     const hoc = wrapper.find(ReactWithApolloHoC);
     expect(hoc.props().beNice).toBe(true);
 
     // Our query has recieved the beNice prop as well
     const query = wrapper.find(Query);
-    console.log(hoc.debug());
     expect(query.props().variables.beNice).toBe(true);
     // check that we're not passing any unexpected values to the query variables
     expect(Object.keys(query.props().variables)).toEqual(['beNice']);

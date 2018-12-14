@@ -184,7 +184,7 @@ This makes attempts to check props difficult, especially if we expect a prop to 
 const reactWithRedux = wrapper.find(ReactWithRedux);
 expect(reactWithRedux.props().greeting).toBe(undefined);
 ```
-Although this would seem like a good test, the nature of javascipt means it will pass even when there is no prop `greeting` on the wrapper.  For example, this also passes:
+Although this may seem like a good test, it will pass even when there is no prop `greeting` on the wrapper.  For example, this also passes:
 
 ```javascript
 const reactWithRedux = wrapper.find(ReactWithRedux);
@@ -226,4 +226,232 @@ Once we understand Redux, the comments in the test will explain what's going on 
 
 # ReactWithApollo
 
+Once you're familliar with the pitfalls of using `mount()` to render a full tree of react components we can add on the additional parts needed to connect them to GraphQL.  There are two more libraries required to do this: `react-apollo` and `graphql-tag`.
 
+There is some boilerplate needed to configure our react application for this, but because we're focusing on unit tests it is unnecessary for this project.  If you're curious, check out the getting started documentation for Apollo here: https://www.apollographql.com/docs/react/essentials/get-started.html#creating-client.
+
+Instead we want to focus on the `Query` component.  In the ReactWithRedux example we used the `connect()` function from `react-redux` to wrap our component and to use Apollo we're going to extend that pattern even further.  `connect()` and `Query` are both examples of a "Higher Order Component", which simply means these are functions or components that output a component in their rendering, and also take a component as input.  In ReactWithRedux we wrap our component in `connect()`:
+
+```javascript
+const ConnectedReactWithRedux = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ReactWithRedux);
+```
+
+Now we're going to another element in between:
+```javascript
+const ReactWithApolloHoC = function(props) {
+  return (
+    <Query
+      query={GREETING_QUERY}
+      variables={{beNice: props.beNice}}
+    >
+      {({loading, error, data, fetchMore, refetch}) => {
+        return (
+          <ReactWithApollo
+            {...props}
+            {...data}
+            {...error}
+          />
+        );
+      }}
+    </Query>
+  );
+}
+```
+
+and call `connect()` on this "HoC":
+```javascript
+const ConnectedReactWithApollo = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ReactWithApolloHoC);
+```
+
+`ReactWithApolloHoC` is a simple function in this example, but it's important to take a close look at what it does.  When React renders this component `Query` will be the first thing to output and it will handle executing our query, waiting for the response and finally passing that incoming data to our `ReactWithApollo` component.  
+
+Query has three important things to focus on.  First provice it with a `query` prop that contains the definition of our graphql query:
+
+```javascript
+query={GREETING_QUERY}
+```
+Second we provide it with a `variables` prop that will map the incoming react properties of our component to the query
+```javascript
+variables={{beNice: props.beNice}}
+```
+Lastly we have `Query` return our desired component, passing into it the resulting data
+```javascript
+{({loading, error, data, fetchMore, refetch}) => {
+  return (
+    <ReactWithApollo
+      {...props}
+      {...data}
+      {...error}
+    />
+  );
+}}
+```
+It's out of scope for this project, but worth reading up on query and how to use `loading` and `error` to change what we render while the query is executing and when there is an error.
+
+the constant `GREETING_QUERY` is a string that is defined with a special tag from the `graphql-tag` library.
+
+```javacript
+const GREETING_QUERY = gql`
+  query($beNice: String) {
+    GreetingQuery(beNice: $beNice) {
+      greeting
+    }
+  }
+`;
+```
+
+That's it.  This should look familliar to you if you've worked with graphql.  We declare it as a `const` so we can import this defintion in our test file for convience, but there's no technical reason we can't just hand-write the same definition in both places.
+
+It's important to understand that the query execution will happen asyncronously and that will add another layer of complexity to our testing.
+
+##### Testing a Query
+
+We're going to add another library to our test file: `react-apollo/test-utils`.  This will let us use a `MockedProvider` to wrap around the `Provider` when mounting our component:
+```javascript
+const wrapper = mount(
+  <MockedProvider mocks={greetingQueryMock} addTypename={false}>
+    <Provider store={store}>
+      <ConnectedReactWithApollo />
+    </Provider>
+  </MockedProvider>
+);
+```
+
+The `MockedProvider` let's us create an array of query responses that will be returned when our query object passes in a `request` with matching variables:
+```javascript
+const greetingQueryMock = [
+  {
+    request: {
+      query: GREETING_QUERY,
+      variables: {
+        beNice: true
+      }
+    },
+    result: {
+      data: {
+        GreetingQuery: {
+          greeting: 'Howdy!'
+        }
+      }
+    }
+  },
+  {
+    request: {
+      query: GREETING_QUERY,
+      variables: {
+        beNice: false
+      }
+    },
+    result: {
+      data: {
+        GreetingQuery: {
+          greeting: 'Bugger Off!'
+        }
+      }
+    }
+  }
+];
+```
+
+So creating a query with `beNice: true` will return `greeting: 'Howdy!'` and creating a query with `beNice: false` will return `greeting: 'Bugger Off!'`.
+
+With our fake data backend created, testing starts the same as in ReactWithRedux.  Use `mount()` to render the tree, `.find()` to find components and check their properties and `store.dispatch()` to change the state of the application.
+
+`Query` introduces an extra wrinkle however, because it executes the query asyncronously we need to use some questionable looking helper functions to force our test to wait long enough for the query to return before checking that our results are rendered as we expect.
+
+```javascript
+async function wait(ms) {
+  let resolve;
+  const promise = new Promise(r => (resolve = r));
+  setTimeout(resolve, ms);
+  await promise;
+}
+
+async function updateWrapper(wrapper, ms = 0) {
+  await wait(ms);
+  wrapper.update();
+}
+```
+
+We use this like so:
+```javascript
+await updateWrapper(wrapper);
+```
+
+This seems wonky to me, but it comes straight from the source: https://blog.apollographql.com/testing-apollos-query-component-d575dc642e04
+
+After calling `updateWrapper()` we can check that the query returned the expected results and our component rendered as expected, but before doing that let's take a closer look at what is rendered before we set the `beNice` parameter by adding some `.debug()` output:
+
+```javascript
+  console.log(wrapper.debug());
+  console.log(wrapper.find(Query).props());
+```
+
+This shows:
+
+```bash
+console.log ReactWithApollo.test.js:99
+  <MockedProvider mocks={{...}} addTypename={false}>
+    <ApolloProvider client={{...}}>
+      <Provider store={{...}}>
+        <Connect(ReactWithApolloHoC)>
+          <ReactWithApolloHoC beNice={[undefined]} actions={{...}}>
+            <Query query={{...}} variables={{...}}>
+              <ReactWithApollo beNice={[undefined]} actions={{...}}>
+                <h3 />
+              </ReactWithApollo>
+            </Query>
+          </ReactWithApolloHoC>
+        </Connect(ReactWithApolloHoC)>
+      </Provider>
+    </ApolloProvider>
+  </MockedProvider>
+console.log ReactWithApollo.test.js:100
+  { query:
+     { kind: 'Document',
+       definitions: [ [Object] ],
+       loc: { start: 0, end: 90 } },
+    variables: { beNice: undefined },
+    children: [Function] }
+```
+
+Notice that the `Query` won't wait to execute and returned a `ReactWithApollo` component with the prop `beNice: undefined`.  We could easily add logic to `ReactWithApolloHoC` to control when the query is executed based on the value of some props, but that is getting out of scope for this project.
+
+Like in ReactWithRedux the rendered output contains much more than the simple `<h3>` tag we're interested in and this can cause headaches when trying to check properties as our components get more complicated, but the combination of `mount()` and `debug()` provide a powerful way to explore how all these libraries work together as you develop.
+
+Finally, let's take a look at the result after the query is allowed to complete:
+
+
+```bash
+console.log ReactWithApollo.test.js:114
+  <MockedProvider mocks={{...}} addTypename={false}>
+    <ApolloProvider client={{...}}>
+      <Provider store={{...}}>
+        <Connect(ReactWithApolloHoC)>
+          <ReactWithApolloHoC beNice={true} actions={{...}}>
+            <Query query={{...}} variables={{...}}>
+              <ReactWithApollo beNice={true} actions={{...}} GreetingQuery={{...}}>
+                <h3>
+                  Howdy!
+                </h3>
+              </ReactWithApollo>
+            </Query>
+          </ReactWithApolloHoC>
+        </Connect(ReactWithApolloHoC)>
+      </Provider>
+    </ApolloProvider>
+  </MockedProvider>
+console.log ReactWithApollo.test.js:115
+  { query:
+     { kind: 'Document',
+       definitions: [ [Object] ],
+       loc: { start: 0, end: 90 } },
+    variables: { beNice: true },
+    children: [Function] }
+```

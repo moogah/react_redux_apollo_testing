@@ -96,7 +96,6 @@ describe('<ReactWithRedux />', async () => {
 
     // and our component will have the default greeting
     expect(wrapper.find(ReactWithRedux).html()).toBe('<h3 class=\"findMe\"></h3>');
-    console.log(wrapper.debug());
 
     // and we can change this state by dispatching an action to the store
     store.dispatch(setGreeting('Hello!'));
@@ -109,16 +108,12 @@ describe('<ReactWithRedux />', async () => {
 
     // there is a problem though, even though we can "see" the updated
     // component with .html(), this change has not yet been rendered
-    console.log(reactWithRedux.props().greeting);
-    expect(reactWithRedux.get(0).props.TOTALLYRANDOMCRAP).toBe(undefined);
+    // console.log(reactWithRedux.props().greeting);
+    expect(reactWithRedux.get(0).props.greeting).toBe(undefined);
 
     // the solution is simple, enzyme provides us a way to force a re-render
     wrapper.update();
     const r = wrapper.find(ReactWithRedux);
-    console.log(r.debug());
-    const reRenderedReactWithRedux = wrapper.find('.findMe');
-    console.log(reRenderedReactWithRedux.text());
-    //console.log(reRenderedReactWithRedux.instance().props);
-    //expect(reRenderedReactWithRedux.props.greeting).toBe('Hello!');
+    //console.log(r.debug());
   });
 });
