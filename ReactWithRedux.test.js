@@ -96,6 +96,7 @@ describe('<ReactWithRedux />', async () => {
 
     // and our component will have the default greeting
     expect(wrapper.find(ReactWithRedux).html()).toBe('<h3 class=\"findMe\"></h3>');
+    console.log(wrapper.debug());
 
     // and we can change this state by dispatching an action to the store
     store.dispatch(setGreeting('Hello!'));

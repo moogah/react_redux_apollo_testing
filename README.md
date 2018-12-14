@@ -154,7 +154,15 @@ const ConnectedReactWithRedux = connect(
   mapDispatchToProps
 )(ReactWithRedux);
 ```
-This is a bunch of automagic that wires up the React and Redux engines, which is great.  Unfortunatly this also means our simple reach component is no longer so simple.
+This is a bunch of automagic that wires up the React and Redux engines, which is great.  Unfortunatly this also means our simple reach component is no longer so simple and complicates testing with Enzyme.  If we use `wrapper.debug()` to see the React output of our new and wrapped component we'll find:
+```
+<Connect(ReactWithRedux)>
+  <ReactWithRedux greeting={[undefined]} actions={{...}}>
+    <h3 className="findMe" />
+  </ReactWithRedux>
+</Connect(ReactWithRedux)>
+```
+This is particularly painful now because using `wrapper.find(ReactWithRedux)` will still return the wrapper component `<Connect(ReactWithRedux>` where we would expect to find only the `<ReactWithRedux>`  component we're interested in.  Most relevant here is that if we check `wrapper.find(ReactWithRedux).props()` we'll find an empty object, where we might be expecting to see `greeting` and `actions` included in there.
 
 This means that when we use Enzyme to render our components the `shallow()` option isn't sufficient if we want to see the rendered result of everything all together.  Instead we need to use `mount()` which will render the entire tree.
 
