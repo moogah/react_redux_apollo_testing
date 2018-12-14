@@ -1,8 +1,9 @@
 # Basic Setup
-The simplest "Hello World" of testing in react requires a bit of setup to get going.  Beyond the obvious installation of Node/NPM and Jest we will also need to install a transpiling toolset called babel along with a series of plugins and presets for babel that will allow Jest to understand the special syntax involved in writing React components.
-
+_In most projects you will probably find this work is already done.  However, because of how many moving parts are involved in this setup you may find that these examples don't work at all or maybe work in some subtly different way.  This section is to provide enough background info on the libraries involved so you can google your way out of a confusing situation._
 
 #### Requirements:
+The simplest "Hello World" of testing in react requires a bit of setup to get going.  Beyond the obvious installation of Node/NPM and Jest we will also need to install a transpiling toolset called babel along with a series of plugins and presets for babel that will allow Jest to understand the special syntax involved in writing React components.
+
 ##### jest.config.js
 
 For this project we're going to use the default settings for jest.  This means it will recognize any file ending with .test.js as a test file.
