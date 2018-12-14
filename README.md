@@ -137,7 +137,7 @@ I've overstuffed the `ReactWithRedux.test.js` file with tests for each part of t
 
 ##### Testing React with Redux (wrappers all the way down)
 
-Relative to the simplicity of testing Redux, ReactComponents that are connected to a Redux store are  complicated to test.  The first wrinkle is that we need to wrap our component in a `<Provider>` component in our tests to allow the redux store to get wired up correctly and because of this using `shallow()` won't help us here. We the `<Provider>` to work with Redux _and_ see our `ReactWithRedux` component get rendered to test it, so now we will use `.mount()` instead.
+Relative to the simplicity of testing Redux, ReactComponents that are connected to a Redux store are  complicated to test.  The first wrinkle is that we need to wrap our component in a `<Provider>` component in our tests, and because of this using `shallow()` won't help. We the `<Provider>` to work with Redux _and_ we still need to see our `ReactWithRedux` component get rendered to test it, so now we will use `.mount()` instead.
 
 ```javascript
 const wrapper = mount(<Provider store={store}><ReactWithRedux /></Provider>);
@@ -159,7 +159,7 @@ const ConnectedReactWithRedux = connect(
 )(ReactWithRedux);
 ```
 
-This wires up the React and Redux engines for us, which is great.  Unfortunatly this also means our simple reach component is no longer so simple:
+This wires up the React and Redux engines for us, which is great.  Unfortunatly this also means our simple react component is no longer so simple:
 ```
 <Provider store={{...}}>
   <Connect(ReactWithRedux)>
@@ -206,7 +206,7 @@ calling `wrapper.get(1)` on a structure like this will return
 
 I've found no way to use a combination of `.find()` `.at()` and `.get()` to return `ElementOne` or `ElementTwo`.
 
-Once we understand Redux, the comments in the test will explain what's going on well enough.  The one key thing to pay attention to is how we set the value of `greeting` by dispatching an action to redux instead of setting the prop directly: `store.dispatch(setGreeting('Hello!'));`
+Once we understand the components of Redux and how this results in our ReactWithRedux component being nested in the tree, the comments in the test will explain what's going on well enough.  The one key thing to pay attention to is how we set the value of `greeting` by dispatching an action to redux instead of setting the prop directly: `store.dispatch(setGreeting('Hello!'));`
 
 ```
   <Connect(ReactWithRedux)>
