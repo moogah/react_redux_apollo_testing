@@ -87,7 +87,7 @@ describe('<ReactWithRedux />', async () => {
     const wrapper = mount(<Provider store={store}><ReactWithRedux /></Provider>);
 
     // Take a look at this to see how connect() wraps our component
-    //console.log(wrapper.debug());
+    console.log(wrapper.debug());
 
     const providerProps = wrapper.props();
 

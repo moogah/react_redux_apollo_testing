@@ -137,7 +137,11 @@ I've overstuffed the `ReactWithRedux.test.js` file with tests for each part of t
 
 ##### Testing React with Redux (wrappers all the way down)
 
-Relative to the simplicity of testing Redux, ReactComponents that are connected to a Redux store are  complicated to test.  The first wrinkle is that we don't want to set properties directly on our components because that may not ensure we've tested how logic in our selectors and reducer affect the properties that get passed in.
+Relative to the simplicity of testing Redux, ReactComponents that are connected to a Redux store are  complicated to test.  The first wrinkle is that we need to wrap our component in a `<Provider>` component in our tests to allow the redux store to get wired up correctly and because of this using `shallow()` won't help us here. We the `<Provider>` to work with Redux _and_ see our `ReactWithRedux` component get rendered to test it, so now we will use `.mount()` instead.
+
+```javascript
+const wrapper = mount(<Provider store={store}><ReactWithRedux /></Provider>);
+```
 
 Further complicating the situation is the special `connect()` function that comes with the `react-redux` library.  This function takes in a Component and a set of functions that define how we want our component to interact with redux.  The easiest to explain is `mapStateToProps` _ie:_
 ```javascript
@@ -154,29 +158,19 @@ const ConnectedReactWithRedux = connect(
   mapDispatchToProps
 )(ReactWithRedux);
 ```
-This is a bunch of automagic that wires up the React and Redux engines, which is great.  Unfortunatly this also means our simple reach component is no longer so simple and complicates testing with Enzyme.  If we use `wrapper.debug()` to see the React output of our new and wrapped component we'll find:
+
+This wires up the React and Redux engines for us, which is great.  Unfortunatly this also means our simple reach component is no longer so simple:
 ```
-<Connect(ReactWithRedux)>
-  <ReactWithRedux greeting={[undefined]} actions={{...}}>
-    <h3 className="findMe" />
-  </ReactWithRedux>
-</Connect(ReactWithRedux)>
+<Provider store={{...}}>
+  <Connect(ReactWithRedux)>
+    <ReactWithRedux greeting={[undefined]} actions={{...}}>
+      <h3 className="findMe" />
+    </ReactWithRedux>
+  </Connect(ReactWithRedux)>
+</Provider>
 ```
+
 This is particularly painful now because using `wrapper.find(ReactWithRedux)` will still return the wrapper component `<Connect(ReactWithRedux>` where we would expect to find only the `<ReactWithRedux>`  component we're interested in.  Most relevant here is that if we check `wrapper.find(ReactWithRedux).props()` we'll find an empty object, where we might be expecting to see `greeting` and `actions` included in there.
-
-This means that when we use Enzyme to render our components the `shallow()` option isn't sufficient if we want to see the rendered result of everything all together.  Instead we need to use `mount()` which will render the entire tree.
-
-This makes using Enzyme significantly more complicated if we want to check the rendering process in detail.  The most common issue I've found is that using `.find(ReactWithRedux)` will return not only our component, but a special generated component wrapping it, _ie:_
-
-```
-<Connect(ReactWithRedux)>
-  <ReactWithRedux greeting="Hello!" actions={{...}}>
-    <h3 className="findMe">
-      Hello!
-    </h3>
-  </ReactWithRedux>
-</Connect(ReactWithRedux)>
-```
 
 This makes attempts to check props difficult, especially if we expect a prop to be `undefined`
 
