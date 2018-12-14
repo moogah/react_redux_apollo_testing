@@ -8,7 +8,7 @@ The simplest "Hello World" of testing in react requires a bit of setup to get go
 
 For this project we're going to use the default settings for jest.  This means it will recognize any file ending with .test.js as a test file.
 
-The only thing special we need to do is provide jest with a `setupFile` parameter in the config file that will handle some boilerplate needed for Enzyme.  This file will be executed at the start of each jest run, but note that if you're using the --watch option you will need to quit and re-run watch to re-load the `setupFile`.
+The only thing special we need to do is provide jest with a `setupFile` parameter in the config file that will handle some boilerplate needed for Enzyme.  This file will be executed at the start of each jest run, but note that if you're using the `--watch` option you will need to quit and re-run watch to re-load the `setupFile`.
 
 Speaking of `--watch`, take a look at `package.json`.  The `scripts` section is where we define a series of aliases for commands that can be invoked in the command line with `npm run [alias]`.  A powerful feature of these aliases is that we can chain them into each other, in this case the alias `test-watch` also uses the alias `test` in its command.  _ie:_ running `npm run test-watch` will run the following command:
 ```
@@ -20,18 +20,18 @@ Check out `setupEnzyme.js`.  This is a simple javascript file that sets up the A
 
 ##### babel, plugins, presets and .babelrc
 
-The most important thing in this section is that Jest has some automagic in it's code, it will look for the presence of a `.babelrc` file in the root of the repository.  If it finds one, it will include the babel transpilier to interpret both our .js and .test.js files before Jest runs them.  This is relevant because defining React components in ES6 javascript uses syntax that is not tecnically valid.  _ie_:
+The most important thing in this section is that Jest has some automagic in it's code; it will look for the presence of a `.babelrc` file in the root of the repository.  If it finds one, it will include the babel transpilier to interpret both our .js and .test.js files before Jest runs them.  This is relevant because defining React components in ES6 javascript uses syntax that is not tecnically valid.  _ie_:
 
 ```
 return (
   <h3>HELLO WORLD</h3>
 );
 ```
-isn't a valid statement in any other language I've seen.  Some light research leads me to believe this is "JSX", and without babel to interpret this code before Jest runs it you'll have a bad time.
+This isn't valid statement in any other language I've seen.  Some light research leads me to believe this is "JSX".  Without babel to interpret this code before Jest runs it you'll have a bad time.
 
-Here we rely on npm install to get all the plugins needed.  Unfortunalty I've not found any one reference that explains exactly what you need, so for now all we can do is reference our existing and working `package.lock` files.  
+Here we rely on npm install to get all the plugins needed.  Unfortunalty I've not found any one reference that explains exactly what you need, so for now all we can do is reference an existing and working `package.lock` file for the list of packages used.  Take a look at `package.json` and search for everything that matches `babel*`.  
 
-Once we've installed all these plugins and presets, we need to create a `.babelrc` and specify the plugins and presets we're using.  
+Once we've installed all these plugins and presets, we need to create a `.babelrc` and specify the plugins and presets we're using.  Some of the packages we've installed will be included as plugins in this file, others are part of the presets.  Again, I don't have a concise set of documentation on the what and why of this.
 
 If you're interested in researching this further, here are some places to start:
 
