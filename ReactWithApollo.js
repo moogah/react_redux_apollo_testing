@@ -54,7 +54,6 @@ const ReactWithApolloHoC = function(props) {
           <ReactWithApollo
             {...props}
             {...data}
-            {...error}
           />
         );
       }}

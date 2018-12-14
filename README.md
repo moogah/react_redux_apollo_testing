@@ -308,9 +308,7 @@ const GREETING_QUERY = gql`
 
 That's it.  This should look familliar to you if you've worked with graphql.  We declare it as a `const` so we can import this defintion in our test file for convience, but there's no technical reason we can't just hand-write the same definition in both places.
 
-It's important to understand that the query execution will happen asyncronously and that will add another layer of complexity to our testing.
-
-##### Testing a Query
+#### Testing a Query
 
 We're going to add another library to our test file: `react-apollo/test-utils`.  This will let us use a `MockedProvider` to wrap around the `Provider` when mounting our component:
 ```javascript
@@ -323,7 +321,7 @@ const wrapper = mount(
 );
 ```
 
-The `MockedProvider` let's us create an array of query responses that will be returned when our query object passes in a `request` with matching variables:
+The `MockedProvider` lets us create an array of query responses that will be returned when our query object passes in a `request` with matching variables:
 ```javascript
 const greetingQueryMock = [
   {
@@ -389,8 +387,8 @@ This seems wonky to me, but it comes straight from the source: https://blog.apol
 After calling `updateWrapper()` we can check that the query returned the expected results and our component rendered as expected, but before doing that let's take a closer look at what is rendered before we set the `beNice` parameter by adding some `.debug()` output:
 
 ```javascript
-  console.log(wrapper.debug());
-  console.log(wrapper.find(Query).props());
+console.log(wrapper.debug());
+console.log(wrapper.find(Query).props());
 ```
 
 This shows:
@@ -423,7 +421,7 @@ console.log ReactWithApollo.test.js:100
 
 Notice that the `Query` won't wait to execute and returned a `ReactWithApollo` component with the prop `beNice: undefined`.  We could easily add logic to `ReactWithApolloHoC` to control when the query is executed based on the value of some props, but that is getting out of scope for this project.
 
-Like in ReactWithRedux the rendered output contains much more than the simple `<h3>` tag we're interested in and this can cause headaches when trying to check properties as our components get more complicated, but the combination of `mount()` and `debug()` provide a powerful way to explore how all these libraries work together as you develop.
+Like in ReactWithRedux the rendered output contains much more than the simple `<h3>` tag we're interested in and this can cause headaches as our components get more complicated, but the combination of `mount()` and `debug()` provide a powerful way to explore how all these libraries work together as you develop.
 
 Finally, let's take a look at the result after the query is allowed to complete:
 
@@ -454,4 +452,20 @@ console.log ReactWithApollo.test.js:115
        loc: { start: 0, end: 90 } },
     variables: { beNice: true },
     children: [Function] }
+```
+
+The last thing I want to point out is how the results from `Query` are assigned as properties to `ReactWithApollo`.  We can see that it's recieved both the `beNice` and `actions` props from `ReactWithApolloHoC` _and_ an additonal prop `GreetingQuery`.
+
+```javascript
+<ReactWithApollo beNice={true} actions={{...}} GreetingQuery={{...}}>
+```
+
+This is because of how we've assigned `props` and `data` to `ReactWithApollo` inside our `Query`:
+
+```javscript
+<ReactWithApollo
+  {...props}
+  {...data}
+  {...error}
+/>
 ```
