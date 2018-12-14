@@ -111,12 +111,14 @@ describe('<ReactWithApollo />', async () => {
 
     // Our query has recieved the beNice prop as well
     const query = wrapper.find(Query);
+    console.log(hoc.debug());
     expect(query.props().variables.beNice).toBe(true);
     // check that we're not passing any unexpected values to the query variables
     expect(Object.keys(query.props().variables)).toEqual(['beNice']);
 
     // and finally we can see our component has recieved its greeting
     const component = wrapper.find(ReactWithApollo);
+
     expect(component.props().GreetingQuery.greeting).toBe('Howdy!');
     expect(component.html()).toBe('<h3>Howdy!</h3>')
   });

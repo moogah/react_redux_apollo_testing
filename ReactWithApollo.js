@@ -25,7 +25,7 @@ const GREETING_QUERY = gql`
 
 class ReactWithApollo extends React.Component {
   render() {
-    if (this.props.GreetingQuery) {
+    if (this.props.GreetingQuery && this.props.GreetingQuery.greeting) {
       return (
         <h3>{this.props.GreetingQuery.greeting}</h3>
       );
