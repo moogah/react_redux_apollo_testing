@@ -31,7 +31,7 @@ This isn't valid statement in any other language I've seen.  Some light research
 
 Here we rely on npm install to get all the plugins needed.  Unfortunalty I've not found any one reference that explains exactly what you need, so for now all we can do is reference an existing and working `package.lock` file for the list of packages used.  Take a look at `package.json` and search for everything that matches `babel*`.  
 
-Once we've installed all these plugins and presets, we need to create a `.babelrc` and specify the plugins and presets we're using.  Some of the packages we've installed will be included as plugins in this file, others are part of the presets.  Again, I don't have a concise set of documentation on the what and why of this.
+Once we've installed all these plugins and presets, we need to create a `.babelrc` file at the root of the repo and specify the plugins and presets we're using.  Some of the packages we've installed will be included as plugins in this file, others are part of the presets.  Again, I don't have a concise set of documentation on the what and why of this.
 
 If you're interested in researching this further, here are some places to start:
 
@@ -45,7 +45,7 @@ Let's start with the easiest possible example so we can focus on what the Enzyme
 
 The component itself is bog standard and only returns some static HTML.  I'll leave a detailed explanation of React components to some other tutorial.
 
-Instead let's focus on Enzyme.  The best reference material I've found for it are the API docs in their github repo https://github.com/airbnb/enzyme/tree/master/docs/api/ShallowWrapper.  It lacks in narrative a bit, but provides plenty of detail if you spend some time with it.
+Instead let's focus on Enzyme.  The best reference material I've found for it is the API docs in their github repo https://github.com/airbnb/enzyme/tree/master/docs/api/ShallowWrapper.  It lacks in narrative, but provides plenty of detail if you spend some time with it.
 
 We're going to use `enzyme.shallow()` to render our component so we can run tests on it.  Doing so is simple:
 ```javascript
@@ -62,7 +62,7 @@ from the internal component in our output.
 
 If we're dilligently testing each component and we fully understand how props are getting passed around, `shallow()` is a great and simple way to be sure each component behaves as it should in isolation.
 
-This approach breaks down when we're trying to use more complex architechures and don't yet understand how they wire everything together.  Enzyme is a great tool for exploring these environments, so let's start digging deeper.
+This approach breaks down when we're trying to use more complex architechures and don't yet understand how they wire everything together.  Instead of constantly waiting for a browser to update, we can continue using Enzyme to explore these new and complicated environments, so let's dig deeper.
 
 # ReactReduxComponent
 In the previous examples we assigned properties to a react component when and where we wrote their tags, _ie:_
