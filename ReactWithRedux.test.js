@@ -86,7 +86,9 @@ describe('<ReactWithRedux />', async () => {
     // render, now we need to use enzyme.mount()
     const wrapper = mount(<Provider store={store}><ReactWithRedux /></Provider>);
 
-    // the provider will have our component as one of its props.children
+    // Take a look at this to see how connect() wraps our component
+    //console.log(wrapper.debug());
+
     const providerProps = wrapper.props();
 
     // the provider will also contain the store and it's current state
@@ -96,11 +98,24 @@ describe('<ReactWithRedux />', async () => {
     expect(wrapper.find(ReactWithRedux).html()).toBe('<h3></h3>');
 
     // and we can change this state by dispatching an action to the store
-    store.dispatch({type: SET_GREETING, greeting: 'Hello!'});
+    store.dispatch(setGreeting('Hello!'));
 
     // The store will have the new value
     expect(providerProps.store.getState()).toEqual({greeting: 'Hello!'});
-    // and our component will be re-rendered
-    expect(wrapper.find(ReactWithRedux).html()).toBe('<h3>Hello!</h3>');
+    // and our component will have it's greeting
+    const reactWithRedux = wrapper.find(ReactWithRedux);
+    expect(reactWithRedux.html()).toBe('<h3>Hello!</h3>');
+
+    // there is a problem though, even though we can "see" the updated
+    // component with .html(), this change has not yet been rendered
+    console.log(reactWithRedux.props());
+    expect(reactWithRedux.get(0).props.greeting).toBe(undefined);
+
+    // the solution is simple, enzyme provides us a way to force a re-render
+    wrapper.update();
+    const reRenderedReactWithRedux = wrapper.find(ReactWithRedux);
+    console.log(reRenderedReactWithRedux.debug());
+    //console.log(reRenderedReactWithRedux.instance().props);
+    //expect(reRenderedReactWithRedux.props.greeting).toBe('Hello!');
   });
 });
