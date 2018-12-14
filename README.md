@@ -7,7 +7,12 @@ The simplest "Hello World" of testing in react requires a bit of setup to get go
 
 For this project we're going to use the default settings for jest.  This means it will recognize any file ending with .test.js as a test file.
 
-The only thing special we need to do is provide jest with a setupFile that will handle some boilerplate needed for Enzyme.
+The only thing special we need to do is provide jest with a `setupFile` parameter in the config file that will handle some boilerplate needed for Enzyme.  This file will be executed at the start of each jest run, but note that if you're using the --watch option you will need to quit and re-run watch to re-load the `setupFile`.
+
+Speaking of `--watch`, take a look at `package.json`.  The `scripts` section is where we define a series of aliases for commands that can be invoked in the command line with `npm run [alias]`.  A powerful feature of these aliases is that we can chain them into each other, in this case the alias `test-watch` also uses the alias `test` in its command.  _ie:_ running `npm run test-watch` will run the following command:
+```
+npm test cross-env NODE_ENV=test jest -- --watch
+```
 
 *babel, plugins, presets and .babelrc*
 
